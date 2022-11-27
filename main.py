@@ -1,16 +1,55 @@
-# This is a sample Python script.
+from flask import Flask, jsonify, request
+import utils
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+app = Flask(__name__)
+app.config["JSON_AS_ASCII"] = False
+
+# База
+@app.route('/books', methods=['GET'])
+def read_books():
+    books = utils.load_books_from_json()
+    return jsonify(books)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.route('/books/‹int:book_id›', methods=['GET'])
+def read_book(book_id):
+    book = utils.get_book_by_id(book_id)
+    return jsonify(book)
+
+# Create
+@app.route('/books', methods=['POST'])
+def create_book():
+
+    book = {}
+    post_data = request.json
+
+    book["title"] = post_data.get("title")
+    book["author"] = post_data.get("author")
+    book["year"] = post_data.get("year")
+
+    book_created = utils.add_book(book)
+
+    return jsonify(book_created)
+
+@app.route('/books/‹int:book_id›', methods=['PUT'])
+def update_book(book_id):
+
+    book = utils.get_book_by_id(book_id)
+    post_data = request.json
+
+    book["title"] = post_data.get("title")
+    book["author"] = post_data.get("author")
+    book["year"] = post_data.get("year")
+
+    utils.update_book(book_id, book)
+
+    return jsonify(book)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.route('/books/‹int:book_id›', methods=['DELETE'])
+def delete_book(book_id):
+    utils.delete_book(book_id)
+    return ""
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+app.run()
